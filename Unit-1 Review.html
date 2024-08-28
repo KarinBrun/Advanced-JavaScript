@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDV321 Advanced JavaScript</title>
+    <style>
+        body {
+            background-color: darkgoldenrod;
+        }
+        #container {
+            width:80%;
+            margin-left:auto;
+            margin-right:auto;
+            background-color: bisque;
+            padding-left:5px;
+            padding-right:5px;
+        }
+
+        .displayGameLibrary {
+            margin-top:20px;
+            padding:5px;
+            border:thin solid black;
+            background-color: blanchedalmond;
+        }
+
+        footer p {
+            text-align: center;
+        }
+
+        .errorMsg {
+            color: red;
+        }
+    </style>
+
+    <script>
+
+        //1. Use the follwing parallel arrays to dynamically populate the select element
+        const gameTypes = ["board", "video", "tabletop", "rpg"];
+        const gameTypeAbb = ['b','v','t','r'];
+
+        //2. Use the following array to dynamically create a set of radio buttons
+        const gameDifficulty = ["Easy","Moderate","Difficult","Hard"];
+
+        //3. Use the following array to dynamicall create a set of checkboxes
+        const gameOptions = ["Good for Kids","Multiplayer","Fast Play","Long Game","Solitare"];
+
+        //updating year
+        let today = new Date();
+
+        //validation
+        function validateGame(gameName, gameType, numOfPlayers, options){
+            let validGameForm = true;
+
+            //game name validation
+            if (gameName == ""){
+                validGameForm = false;
+                document.querySelector("#gameNameError").innerHTML = "Game name cannot be blank.";
+            }
+            if (gameName.length > 50){
+                validGameForm = false;
+                document.querySelector("#gameNameError").innerHTML = "Game name max 50 characters.";
+            }
+
+            //game type validation
+            if (gameType == 0){
+                validGameForm = false;
+                document.querySelector("#gameTypeError").innerHTML = "Please select an option.";
+            }
+
+            //num of players validation
+            if (isNaN(numOfPlayers) == true){
+                validGameForm = false;
+                document.querySelector("#gameNumberError").innerHTML = "Must be a number.";
+            }
+            if (numOfPlayers <= 1){
+                validGameForm = false;
+                document.querySelector("#gameNumberError").innerHTML = "Must be more than 1.";
+            }
+            if (numOfPlayers > 20){
+                validGameForm = false;
+                document.querySelector("#gameNumberError").innerHTML = "Cannot be more than 20.";
+            }
+            if(numOfPlayers.indexOf("/") != -1){
+                validGameForm = false;
+                document.querySelector("#gameNumberError").innerHTML = "Must be a whole number.";
+            }
+            if(numOfPlayers.indexOf(".") != -1){
+                validGameForm = false;
+                document.querySelector("#gameNumberError").innerHTML = "Must be a whole number.";
+            }
+
+            //difficulty validation
+            if (document.querySelectorAll('input[type="radio"]:checked').length === 0){
+                validGameForm = false;
+                document.querySelector("#gameDifficultyError").innerHTML = "Must select one option.";
+            }
+
+            //game options validation
+            if (options.includes('Fast Play') && options.includes('Long Game')){
+                validGameForm = false;
+                document.querySelector("#gameOptionsError").innerHTML = "Cannot select Fast Play and Long Game at same time.";
+            }
+
+            return validGameForm;
+        }
+
+        //data storage
+        let gameLibrary = [];
+
+        //form processing
+        function addGame(){
+            let gameName = document.querySelector("#gameName").value;
+            let gameType = document.querySelector("#gameType").value;
+            let numOfPlayers = document.querySelector("#gamePlayers").value;
+            let difficulty = document.querySelector('input[type="radio"]:checked').value;
+            let allOptions = document.querySelectorAll("#options");
+            let options = [];
+            for (x=0; x<allOptions.length; x++){
+                if (allOptions[x].checked){
+                    options.push(gameOptions[x]);
+                }
+            }
+
+            if (validateGame(gameName, gameType, numOfPlayers, options) == true){
+                let game = {
+                    name: gameName,
+                    type: gameType,
+                    players: numOfPlayers,
+                    difficulty: difficulty,
+                    options: options
+                }
+                console.log(game);
+                gameLibrary.push(game);
+                console.log(gameLibrary);
+            }
+        }
+
+        function newGame(){
+            document.querySelector("#gameNameError").innerHTML = "";
+            document.querySelector("#gameTypeError").innerHTML = "";
+            document.querySelector("#gameNumberError").innerHTML = "";
+            document.querySelector("#gameDifficultyError").innerHTML = "";
+            document.querySelector("#gameOptionsError").innerHTML = "";
+        }
+
+        function startOver(){
+            document.querySelector("#gameNameError").innerHTML = "";
+            document.querySelector("#gameTypeError").innerHTML = "";
+            document.querySelector("#gameNumberError").innerHTML = "";
+            document.querySelector("#gameDifficultyError").innerHTML = "";
+            document.querySelector("#gameOptionsError").innerHTML = "";
+            document.querySelector("#displayGameLibrary").innerHTML = "";
+            gameLibrary = [];
+        }
+
+        //display game library
+        function displayGameLibrary(){
+            let gameHTML = "";
+            for (x=0; x<gameLibrary.length; x++){
+                game = gameLibrary[x];
+                gameHTML += "Game Name: " + game.name
+                + "<br />" + "Game Type: " + game.type
+                + "<br />" + "Number of Players: " + game.players
+                + "<br />" + "Game Difficulty: " + game.difficulty
+                + "<br />" + "Game Options: " + game.options
+                + "<br /> <br />";
+            }
+            document.querySelector("#displayGameLibrary").innerHTML = gameHTML;
+        }
+        
+    </script>
+</head>
+<body>
+    <div id="container">
+        <header>
+            <h1>WDV321 Advanced JavaScript</h1>
+        </header>
+        <main>
+            <h2>Unit-1 JavaScript Review Project</h2>
+            <form method="" action="#" id="gameForm">
+                <fieldset>
+                    <legend>Game Input</legend>
+                    <p>
+                        <label for="gameName">Game Name:</label>
+                        <input type="text" id="gameName" name="gameName" placehoder="Game Name">
+                        <span id="gameNameError" class="errorMsg"></span>
+                    </p>
+                    <p>
+                        <label for="gameType">Game Type:</label>
+                        <select id="gameType" name="gameType">
+                            <option value="0">Select a Game Type</option>
+                            <script>
+                                for(let y=0; y<gameTypes.length; y++){
+                                    document.write("<option>" + gameTypes[y] + " - " + gameTypeAbb[y] + "</option>");
+                                }
+                            </script>
+                        </select>
+                        <span id="gameTypeError" class="errorMsg"></span>
+                    </p>
+                    <p>
+                        <label for="gamePlayers">Number of Players:</label>
+                        <input type="text" id="gamePlayers" name="gamePlayers">
+                        <span id="gameNumberError" class="errorMsg"></span>
+                    </p>
+                    <p>
+                        Difficulty Rating:
+                        <script>
+                            for(let x=0; x<gameDifficulty.length; x++){
+                                document.write("<input type='radio' name='difficultyRadio' id='difficultyRadio' value='"+gameDifficulty[x]+"'>" + gameDifficulty[x] + "</input>");
+                            }
+                        </script>
+                        <span id="gameDifficultyError" class="errorMsg"></span>
+                    </p>
+                    <p>
+                        Game Options:
+                        <script>
+                            for(let z=0; z<gameOptions.length; z++){
+                                document.write("<input type='checkbox' id='options'>" + gameOptions[z] + "</input>");
+                            }
+                        </script>
+                        <span id="gameOptionsError" class="errorMsg"></span>
+                    </p>
+
+                    <p>
+                        <input type="button" value="Add Game to Library" onclick="addGame()">
+                        <input type="reset" value="New Game" onclick="newGame()">
+                        <input type="button" value="Display Game Library" onclick="displayGameLibrary()">
+                    </p>
+                    <p>
+                        <input type="reset" value="Start Over" onclick="startOver()">
+                    </p>
+                </fieldset>
+            </form>
+
+            <section class="displayGameLibrary">
+                <h3>Game Library</h3>
+                <span id="displayGameLibrary"></span>
+            </section>
+
+            <div id="instructionsBox">
+                <h3>Instructions:</h3>
+                <p>
+                    Dynamic Content:
+                    <ol>
+                        <li>Use the provided arrays to dynamically populate the Game Type. Include the abbreviations as value attritubes.</li>
+                        <li>Use the provided array to dynamically create a set of radio buttons for Diffulty Rating.</li>
+                        <li>Use the provided array to dynamically create a set of checkboxes for Game Options.</li>
+                        <li>Dynamically load the Copyright year in the footer so that is always the current year.</li>
+                    </ol>
+                </p>
+                <p>
+                    Data Validation:
+                    <ol>
+                        <li>Game Name - cannot be blank, max 50 characters</li>
+                        <li>Game Type - one must be selected</li>
+                        <li>Number of Players - must be numeric, 1+, max of 20, whole number</li>
+                        <li>Difficulty Rating - one must be selected</li>
+                        <li>Game Options:  Some, none or all may be selected</li>
+                        <li>Game Options: "Fast Play" and "Long Game" cannot both be selected</li>
+                    </ol>
+                </p>
+                <p>
+                    Data Storage:
+                    <ol>
+                        <li>Create an object called game for storing the game information. Use a class or object literal.</li>
+                        <li>The game object must allow for any/all selected content.</li>
+                        <li>Create an object called gameLibrary. It will store an array of game objects.</li>
+                    </ol>
+                </p>
+                <p>
+                    Form Processing:
+                    <ol>
+                        <li>When the form is submitted by the "Add Game to Library" AND all fields pass validations gather the form data.</li>
+                        <li>Load the game data into a game object</li>
+                        <li>Display the game object in the console</li>
+                        <li>Add the game object to the gameLibrary</li>
+                        <li>Display the gameLibrary in the console</li>
+                        <li>"New Game" button should clear the form entries</li>
+                        <li>"Start Over" button should clear the form, the display and the data.</li>
+                    </ol>
+                </p>
+                <p>
+                    Display Game Library:
+                    <ol>
+                        <li>When the "Display Game Library" button is clicked display each game in the game library in the Game Library Area.</li>
+                        <li>Design your own layout and styling for to display the games.</li>
+                    </ol>
+                </p>
+            </div>
+        </main>
+        <footer>
+            <p>Copyright <script>document.write(today.getFullYear());</script> DMACC All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
