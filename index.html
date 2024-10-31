@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDV321 Advanced JavaScript</title>
+    <script src="cookieFunctions.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background-color:burlywood;
+        }
+        #container {
+            width:70%;
+            margin-left:auto;
+            margin-right:auto;
+            padding-left:15px;
+            padding-right:15px;
+            background-color: chocolate;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        nav {
+            display:flex;
+            justify-content: space-between;
+            margin-bottom:15px;
+        }
+
+        main {
+            display:flex;
+        }
+
+        main section {
+            width:50%;
+            border:thin solid black;
+
+        }
+
+        section h2, section h3 {
+            text-align: center;
+        }
+
+        form {
+            width: 70%;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+
+        footer p {
+            text-align: center;
+        }
+
+        .errorText {
+            color: white;
+        }
+
+        .loginSection {
+            display: none;
+        }
+    </style>
+    <script>
+        //Instructions:  
+        //1. Create a JavaScript object called eventRegistration.  This object will hold one or more registrations
+        //  each registration will have a name, email, phone and registration date (use the current date)
+        //
+        //2. Create a hit counter that will record each time somebody comes to this page.  Store the hit counter in a cookie.
+        //  Each time somebody comes to this page display the current value of the hit counter in the next to "Current Activity:"
+
+        //Sign In button:
+        //When the sign in form is clicked the following will happen
+        //  a. Somewhere on the page display a form to accept the username and password.  Use one of methods we reviewed
+        //      to dynamically display the form when needed.
+        //  b. When that form is selected compare the input to the contents of the membersInfo object. 
+        //  c. If you find a match in the membersInfo object create a cookie called authorizedUser with the username as its value.
+
+
+        let membersInfo = {
+            memberUserNames:[
+                "A1D2C4",
+                "B2D4C6",
+                "B3C2D1"
+            ]
+        }
+
+        let registrationDate = new Date();
+
+        let eventRegistration = JSON.parse(localStorage.getItem("registrationJSON")) || [];
+
+        pageSetup = () => {
+            //page counter
+            let pageCounter = getCookieValue("pageCounter");
+            console.log("pageCounter current cookie value: " + pageCounter);
+            pageCounter++;
+            document.querySelector("#displayCount").innerHTML = pageCounter;
+            setCookie("pageCounter", pageCounter);
+        }
+    
+        //form validation
+        function nameValidation(){
+            //validates the name is filled
+            let validForm = true;
+            let displayName = document.querySelector("#name").value;
+                if(displayName == ""){
+                    validForm = false;
+                    document.querySelector("#nameError").innerHTML = "Name cannot be blank.";
+                }
+                return validForm;
+        }
+
+        function emailValidation(){
+            //validates the email is a valid format and is filled
+            let validForm = true;
+            let displayEmail = document.querySelector("#email").value;
+                if(displayEmail == ""){
+                    validForm = false;
+                    document.querySelector("#emailError").innerHTML = "Email cannot be blank.";
+                }
+                else{
+                    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(displayEmail)){
+                        document.querySelector("#email").innerHTML = displayEmail;
+                    }
+                    else{
+                        validForm = false;
+                        document.querySelector("#emailError").innerHTML = "Email must be formatted correctly.";
+                    }
+                }
+                return validForm;
+        }
+
+        function phoneValidation(){
+            //validates the phone is filled
+            let validForm = true;
+            let displayName = document.querySelector("#phone").value;
+                if(displayName == ""){
+                    validForm = false;
+                    document.querySelector("#phoneError").innerHTML = "Phone cannot be blank.";
+                }
+                return validForm;
+        }
+
+        //runs validation and creates local storage
+        function submitClicked(){
+            let nameValid = nameValidation();
+            let emailValid = emailValidation();
+            let phoneValid = phoneValidation();
+            if(nameValid && emailValid && phoneValid){
+                let registration = {
+                    name: document.querySelector("#name").value,
+                    email: document.querySelector("#email").value,
+                    phone: document.querySelector("#phone").value,
+                    date: registrationDate.toDateString()
+                }
+                eventRegistration.push(registration);
+
+                //eventRegistration.name.push(document.querySelector("#name").value);
+                //eventRegistration.email.push(document.querySelector("#email").value);
+                //eventRegistration.phone.push(document.querySelector("#phone").value);
+
+                let registrationJSON = JSON.stringify(eventRegistration);
+                localStorage.setItem("registrationJSON", registrationJSON);
+                console.log(JSON.parse(localStorage.getItem("registrationJSON")));
+            }
+        }
+
+        //signin form show
+        function signinClicked(){
+            document.querySelector(".loginSection").style.display = "inline";
+        }
+
+        //login
+        function loginClicked(){
+            let inUserName = document.querySelector("#username").value;
+            for(let x=0;x<membersInfo.memberUserNames.length;x++){
+                if (inUserName == membersInfo.memberUserNames[x]){
+                    setCookie("authorizedUser", inUserName, 30);
+                }
+            }
+            console.log(document.cookie);
+            document.querySelector("#showLogin").innerHTML = "Thank you for logging in!"
+        }
+
+    </script>
+</head>
+<body onload="pageSetup()">
+    <div id="container">
+        <header>
+            <h1>Science Fiction Book Club</h1>
+            <h2>"Predicting the future using or describing the future?"</h2>
+        </header>
+        
+        <nav>
+            <div>
+                <a href="index.html"><button>Home Page</button></a>
+                <a href="members.html"><button>Members Page</button></a>              
+            </div>
+            <button onclick="signinClicked()">Sign In</button>
+        </nav>
+
+        <main>
+            <section class="leftColumn">
+                <h3>Sign Up for our next Public Event</h3>
+                <form method="post" action="#">
+                    <label for="name">Name: </label>
+                    <input type="text" id="name">
+                    <span id="nameError" class="errorText"></span>
+                    <br>
+                    <br>
+
+                    <label for="email">Email: </label>
+                    <input type="text" id="email">
+                    <span id="emailError" class="errorText"></span>
+                    <br>
+                    <br>
+
+                    <label for="phone">Phone: </label>
+                    <input type="text" id="phone">
+                    <span id="phoneError" class="errorText"></span>
+                    <br>
+                    <br>
+
+                    <button type="button" onclick="submitClicked()">Submit</button>
+                    <button type="reset">Reset</button>
+                    <br>
+                    <br>
+                </form>
+            </section>
+            <section class="rightColumn">
+                <h3>Upcoming Events</h3>
+                <div>
+                    <h3>"Did Star Trek predict AI?"</h3>
+                </div>
+            </section>
+
+            <section class="loginSection">
+                <p>
+                    <label for="username">Username:</label>
+                    <input type="text" name="username" id="username">
+                </p>
+                <p>
+                    <label for="password">Password:</label>
+                    <input type="text" name="password" id="password">
+                </p>
+                <p>
+                    <button onclick="loginClicked()">Login</button>
+                    <button type="reset">Reset</button>
+                    <br>
+                    <br>
+                    <span id="showLogin"></span>
+                </p>
+            </section>
+        </main>
+
+        <footer>
+            <p>Copyright &copy;<script>document.write(registrationDate.getFullYear());</script> All rights reserved.</p>
+            <p>Current Activity: <span id="displayCount"></span></p>
+        </footer>
+
+    </div>
+</body>
+</html>
